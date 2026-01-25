@@ -1,0 +1,455 @@
+<?php
+// Tizon Gaming - Mobile App Style (Updated)
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="description" content="🔥 Welcome To TizonGaming! Get Free Fire News first. Booyah Every Day!" />
+    <title>TIZON GAMING | Mobile App</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CORE CSS --- */
+        :root {
+            --bg-primary: #17181a;
+            --bg-secondary: #202225;
+            --bg-tertiary: #2c2f33;
+            --bg-code: #101214;
+            --bg-hover: #35383c;
+            --text-primary: #f0f2f5;
+            --text-secondary: #a8b3cf;
+            --text-active: #82aaff; /* Default, will be overridden by JS */
+            --border-color: #3a3d42;
+            --error-color: #ff8a80;
+            --sidebar-width: 260px;
+            --font-family: 'Inter', sans-serif;
+            --font-family-code: 'Roboto Mono', monospace;
+        }
+
+        /* --- Base & Reset --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow: hidden; background-color: var(--bg-primary); color: var(--text-primary); font-family: var(--font-family); font-size: 16px; }
+        button, a { background: none; border: none; cursor: pointer; color: inherit; text-decoration: none; font-family: inherit; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; font-size: 20px; color: var(--text-secondary); transition: color 0.2s; user-select: none; }
+
+        /* --- Main Layout --- */
+        .app-container { display: flex; width: 100%; height: 100%; }
+        .main-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .main-header { display: flex; align-items: center; padding: 12px 16px; background-color: rgba(23, 24, 26, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); flex-shrink: 0; position: sticky; top: 0; z-index: 100; justify-content: space-between; }
+        .header-title { font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; color: var(--text-active); }
+        .header-title span { color: var(--text-primary); }
+        .icon-button { padding: 8px; border-radius: 50%; display: flex; transition: background-color 0.2s; }
+        .icon-button:hover { background-color: var(--bg-hover); }
+        .content-area { flex-grow: 1; overflow: hidden; position: relative; }
+
+        /* --- Sidebar --- */
+        #left-sidebar { position: fixed; top: 0; left: 0; height: 100%; width: var(--sidebar-width); max-width: 85%; background-color: var(--bg-secondary); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 1001; transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        body.left-sidebar-open #left-sidebar { transform: translateX(0); }
+        .sidebar-content { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; overflow-y: auto; }
+        .sidebar-header { font-size: 1.5rem; font-weight: 700; padding: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        .sidebar-nav a, .sidebar-nav button { font-size: 1em; display: flex; align-items: center; gap: 16px; padding: 14px; border-radius: 8px; font-weight: 500; transition: background-color 0.2s, color 0.2s; color: var(--text-secondary); text-align: left; width: 100%; margin-bottom: 4px; }
+        .sidebar-nav a:hover, .sidebar-nav button:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+        .sidebar-nav a.active { background-color: var(--bg-tertiary); color: var(--text-active); border-left: 3px solid var(--text-active); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); opacity: 0; visibility: hidden; transition: opacity 0.3s; z-index: 1000; }
+        body.left-sidebar-open .overlay { opacity: 1; visibility: visible; }
+
+        /* --- Screens --- */
+        .screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding-bottom: 80px; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        .content-wrapper { max-width: 800px; width: 100%; margin: 0 auto; padding: 16px; }
+
+        /* --- Custom Cards & UI Elements --- */
+        .hero-card {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;
+            border: 1px solid var(--border-color); position: relative; overflow: hidden;
+        }
+        .hero-card::before {
+            content:''; position: absolute; top:0; left:0; width:100%; height:100%;
+            background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070') center/cover;
+            opacity: 0.15; z-index: 0;
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-card h1 { font-size: 2rem; margin-bottom: 8px; text-transform: uppercase; }
+        .hero-card p { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95rem; }
+        
+        .btn-action {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 20px; background: var(--text-active); color: var(--bg-primary);
+            border-radius: 8px; font-weight: 600; transition: opacity 0.2s;
+        }
+        .btn-action:hover { opacity: 0.9; }
+        .btn-outline { background: transparent; border: 1px solid var(--text-active); color: var(--text-active); }
+
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 16px; }
+        .section-header h2 { font-size: 1.25rem; font-weight: 600; }
+
+        /* Video List */
+        .video-card { 
+            display: flex; flex-direction: column; background: var(--bg-secondary); 
+            border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border-color);
+        }
+        .video-thumb { position: relative; padding-top: 56.25%; background: #000; }
+        .video-thumb img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+        .video-info { padding: 12px 16px; }
+        .video-title { font-size: 1rem; font-weight: 600; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .video-meta { font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .stat-item { background: var(--bg-tertiary); padding: 16px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); }
+        .stat-item i { font-size: 1.5rem; color: var(--text-active); margin-bottom: 8px; }
+        .stat-item h4 { font-size: 1.1rem; margin-bottom: 2px; }
+        .stat-item span { font-size: 0.8rem; color: var(--text-secondary); }
+
+        /* Forms */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9rem; }
+        .form-input { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px; border-radius: 8px; outline: none; }
+        .form-input:focus { border-color: var(--text-active); }
+
+        /* Theme Dots */
+        .theme-selector { display: flex; gap: 12px; margin-top: 20px; padding: 10px; background: var(--bg-tertiary); border-radius: 50px; justify-content: center; width: fit-content; margin-left: auto; margin-right: auto; }
+        .theme-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+        .theme-dot.active { border-color: var(--text-primary); transform: scale(1.1); }
+
+        /* Bottom Nav for Mobile */
+        .bottom-nav {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex; justify-content: space-around; align-items: center;
+                position: fixed; bottom: 0; left: 0; width: 100%;
+                background: rgba(32, 34, 37, 0.95); backdrop-filter: blur(10px);
+                border-top: 1px solid var(--border-color); padding: 10px 0; z-index: 999;
+            }
+            .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-secondary); font-size: 0.75rem; width: 100%; }
+            .nav-item.active { color: var(--text-active); }
+            .nav-item span { font-size: 24px; }
+            #left-sidebar { width: 80%; }
+            .icon-button#menu-toggle { display: block; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay"></div>
+
+    <aside id="left-sidebar">
+        <div class="sidebar-header">
+            TIZON<span style="color:var(--text-active)">GAMING</span>
+        </div>
+        <div class="sidebar-content">
+            <nav class="sidebar-nav">
+                <a href="#" onclick="showScreen('home')" class="active" id="link-home">
+                    <span class="material-symbols-outlined">home</span> Home
+                </a>
+                <a href="#" onclick="showScreen('videos')" id="link-videos">
+                    <span class="material-symbols-outlined">play_circle</span> Videos
+                </a>
+                <a href="#" onclick="showScreen('about')" id="link-about">
+                    <span class="material-symbols-outlined">info</span> About
+                </a>
+                <a href="#" onclick="showScreen('contact')" id="link-contact">
+                    <span class="material-symbols-outlined">mail</span> Contact
+                </a>
+            </nav>
+            
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <p style="color:var(--text-secondary); font-size:0.8rem; margin-bottom:10px; text-align:center;">App Theme</p>
+                <div class="theme-selector">
+                    <div class="theme-dot" style="background: #4F29FF;" onclick="setTheme('#4F29FF')"></div>
+                    <div class="theme-dot" style="background: #FF2929;" onclick="setTheme('#FF2929')"></div>
+                    <div class="theme-dot" style="background: #FF8C00;" onclick="setTheme('#FF8C00')"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="app-container">
+        <div class="main-wrapper">
+            <header class="main-header">
+                <button class="icon-button" id="menu-toggle">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="header-title">TIZON<span>GAMING</span></div>
+                <a href="https://www.youtube.com/channel/UCYvUpDUGiGKcXmYUjUS-t3A" target="_blank" class="icon-button">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+            </header>
+
+            <main class="content-area">
+                
+                <div id="screen-home" class="screen active">
+                    <div class="content-wrapper">
+                        <div class="hero-card">
+                            <div class="hero-content">
+                                <h1>Booyah! <br>Leaks & News</h1>
+                                <p>Get the latest Collabs, Patch Notes, and Free Fire updates before anyone else.</p>
+                                <div style="display:flex; gap:10px; justify-content:center;">
+                                    <a href="https://www.youtube.com/channel/UCYvUpDUGiGKcXmYUjUS-t3A?sub_confirmation=1" target="_blank" class="btn-action">
+                                        <i class="fab fa-youtube"></i> Subscribe
+                                    </a>
+                                    <button onclick="showScreen('videos')" class="btn-action btn-outline">
+                                        Latest Leaks
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-header">
+                            <h2>Featured Updates</h2>
+                            <button onclick="showScreen('videos')" style="color:var(--text-active); font-size:0.9rem;">See All</button>
+                        </div>
+
+                        <div id="home-feed">
+                            <p style="text-align:center; color:var(--text-secondary); padding:20px;">Loading updates...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="screen-videos" class="screen">
+                    <div class="content-wrapper">
+                        <div class="section-header">
+                            <h2>Latest Videos</h2>
+                        </div>
+                        <div id="video-container">
+                            </div>
+                    </div>
+                </div>
+
+                <div id="screen-about" class="screen">
+                    <div class="content-wrapper">
+                        <div class="profile-card" style="background:var(--bg-secondary); padding:24px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+                            <div style="width:80px; height:80px; background:var(--bg-tertiary); border:2px solid var(--text-active); border-radius:50%; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                <img src="favicon.png" alt="Tizon Logo" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                            
+                            <h2 style="margin-bottom:8px;">Tizon Gaming</h2>
+                            <p style="color:var(--text-secondary); margin-bottom:24px;">Content Creator • Free Fire News</p>
+                            
+                            <div style="text-align:left; color:var(--text-secondary); line-height:1.6; margin-bottom:24px;">
+                                <p>Booyah Every Day! I bring you the hottest Free Fire news and updates from around the globe. Whether it's the latest collab, secret leaks, or detailed patch notes, you'll find it here first.</p>
+                            </div>
+
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <i class="fas fa-video"></i>
+                                    <h4>Daily</h4>
+                                    <span>Uploads</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-users"></i>
+                                    <h4>Active</h4>
+                                    <span>Community</span>
+                                </div>
+                            </div>
+
+                            <div style="margin-top:24px; display:flex; justify-content:center; gap:16px;">
+                                <a href="#" class="icon-button"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="icon-button"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="icon-button"><i class="fab fa-discord"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="screen-contact" class="screen">
+                    <div class="content-wrapper">
+                        <div style="background:var(--bg-secondary); padding:24px; border-radius:12px; border:1px solid var(--border-color);">
+                            <h2 style="margin-bottom:20px;">Contact / Collab</h2>
+                            <form id="contactForm">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" id="form-name" class="form-input" placeholder="Your Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="form-email" class="form-input" placeholder="Your Email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Message</label>
+                                    <textarea id="form-message" class="form-input" rows="5" placeholder="Let's talk business..." required style="resize:none;"></textarea>
+                                </div>
+                                <button type="submit" class="btn-action" style="width:100%;">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <nav class="bottom-nav">
+                <button class="nav-item active" onclick="showScreen('home')" id="nav-home">
+                    <span class="material-symbols-outlined">home</span>
+                    Home
+                </button>
+                <button class="nav-item" onclick="showScreen('videos')" id="nav-videos">
+                    <span class="material-symbols-outlined">play_circle</span>
+                    Videos
+                </button>
+                <button class="nav-item" onclick="showScreen('about')" id="nav-about">
+                    <span class="material-symbols-outlined">info</span>
+                    About
+                </button>
+                <button class="nav-item" onclick="showScreen('contact')" id="nav-contact">
+                    <span class="material-symbols-outlined">mail</span>
+                    Contact
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        // --- UI LOGIC ---
+        const sidebar = document.getElementById('left-sidebar');
+        const overlay = document.getElementById('overlay');
+        const body = document.body;
+
+        document.getElementById('menu-toggle').addEventListener('click', () => {
+            body.classList.add('left-sidebar-open');
+        });
+
+        overlay.addEventListener('click', () => {
+            body.classList.remove('left-sidebar-open');
+        });
+
+        // --- NAVIGATION SYSTEM ---
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            // Show target screen
+            document.getElementById(`screen-${screenId}`).classList.add('active');
+            
+            // Update Sidebar State
+            document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+            const sideLink = document.getElementById(`link-${screenId}`);
+            if(sideLink) sideLink.classList.add('active');
+
+            // Update Bottom Nav State
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
+            const navLink = document.getElementById(`nav-${screenId}`);
+            if(navLink) navLink.classList.add('active');
+
+            // Close sidebar on mobile if open
+            if(window.innerWidth < 1024) {
+                body.classList.remove('left-sidebar-open');
+            }
+        }
+
+        // --- THEMING ---
+        function setTheme(color) {
+            document.documentElement.style.setProperty('--text-active', color);
+            // Optional: Save to local storage for persistence
+            // localStorage.setItem('themeColor', color);
+        }
+
+        // --- YOUTUBE API LOGIC ---
+        const channelID = 'UCYvUpDUGiGKcXmYUjUS-t3A';
+        const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelID}`;
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+        async function fetchVideos() {
+            const videoContainer = document.getElementById('video-container');
+            const homeFeed = document.getElementById('home-feed');
+            
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    videoContainer.innerHTML = '';
+                    homeFeed.innerHTML = '';
+                    
+                    data.items.forEach((video, index) => {
+                        let videoId = '';
+                        if (video.link.includes('v=')) {
+                            videoId = video.link.split('v=')[1].split('&')[0];
+                        } else if (video.link.includes('shorts/')) {
+                            videoId = video.link.split('shorts/')[1].split('?')[0];
+                        }
+                        
+                        const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                        const date = new Date(video.pubDate).toLocaleDateString();
+
+                        const html = `
+                            <a href="${video.link}" target="_blank" class="video-card">
+                                <div class="video-thumb">
+                                    <img src="${thumbUrl}" alt="Thumbnail">
+                                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.6); padding:10px; border-radius:50%;">
+                                        <i class="fas fa-play" style="color:#fff; font-size:20px; margin-left:2px;"></i>
+                                    </div>
+                                </div>
+                                <div class="video-info">
+                                    <div class="video-title">${video.title}</div>
+                                    <div class="video-meta"><i class="far fa-clock"></i> ${date}</div>
+                                </div>
+                            </a>
+                        `;
+                        
+                        // Populate Videos Page
+                        videoContainer.insertAdjacentHTML('beforeend', html);
+                        
+                        // Populate Home Feed (Limit to 3)
+                        if(index < 3) {
+                            homeFeed.insertAdjacentHTML('beforeend', html);
+                        }
+                    });
+                }
+            } catch (e) {
+                videoContainer.innerHTML = '<p style="text-align:center; padding:20px; color:var(--error-color);">Unable to load videos offline.</p>';
+            }
+        }
+
+        // --- CONTACT FORM LOGIC ---
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('form-name').value;
+            const email = document.getElementById('form-email').value;
+            const message = document.getElementById('form-message').value;
+            const recipient = "business.tizongaming@gmail.com";
+            const subject = encodeURIComponent("Business Inquiry - " + name);
+            const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
+            
+            const btn = this.querySelector('button');
+            const originalText = btn.innerText;
+            
+            btn.innerText = 'Redirecting...';
+            btn.style.opacity = '0.7';
+            
+            setTimeout(() => {
+                window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+                setTimeout(() => {
+                    this.reset();
+                    btn.innerText = originalText;
+                    btn.style.opacity = '1';
+                }, 2000);
+            }, 500);
+        });
+
+        // --- INIT & RANDOM THEME ON REFRESH ---
+        function init() {
+            fetchVideos();
+            
+            // Updated: Random Color on Page Load/Refresh
+            const colors = ['#4F29FF', '#FF2929', '#FF8C00']; // Purple, Red, Orange
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            setTheme(randomColor);
+        }
+
+        init();
+    </script>
+</body>
+</html>
